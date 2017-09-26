@@ -35,7 +35,7 @@ type authenticateMessageFields struct {
 }
 
 func (m authenicateMessage) MarshalBinary() ([]byte, error) {
-	if !m.NegotiateFlags.Has(negotiateFlagNTLMSSPNEGOTIATEUNICODE) {
+	if !m.NegotiateFlags.Has(NTLMSSP_NEGOTIATE_UNICODE) {
 		return nil, errors.New("Only unicode is supported")
 	}
 
@@ -44,7 +44,7 @@ func (m authenicateMessage) MarshalBinary() ([]byte, error) {
 
 	ptr := binary.Size(&authenticateMessageFields{})
 	f := authenticateMessageFields{
-		messageHeader:       newMessageHeader(3),
+		messageHeader:       newMessageHeader(NtLmAuthenticate),
 		NegotiateFlags:      m.NegotiateFlags,
 		LmChallengeResponse: newVarField(&ptr, len(m.LmChallengeResponse)),
 		NtChallengeResponse: newVarField(&ptr, len(m.NtChallengeResponse)),
@@ -53,7 +53,7 @@ func (m authenicateMessage) MarshalBinary() ([]byte, error) {
 		Workstation:         newVarField(&ptr, len(workstation)),
 	}
 
-	f.NegotiateFlags.Unset(negotiateFlagNTLMSSPNEGOTIATEVERSION)
+	f.NegotiateFlags.Unset(NTLMSSP_NEGOTIATE_VERSION)
 
 	b := bytes.Buffer{}
 	if err := binary.Write(&b, binary.LittleEndian, &f); err != nil {
@@ -90,10 +90,10 @@ func ProcessChallenge(challengeMessageData []byte, user, password string) ([]byt
 		return nil, err
 	}
 
-	if cm.NegotiateFlags.Has(negotiateFlagNTLMSSPNEGOTIATELMKEY) {
+	if cm.NegotiateFlags.Has(NTLMSSP_NEGOTIATE_LM_KEY) {
 		return nil, errors.New("Only NTLM v2 is supported, but server requested v1 (NTLMSSP_NEGOTIATE_LM_KEY)")
 	}
-	if cm.NegotiateFlags.Has(negotiateFlagNTLMSSPNEGOTIATEKEYEXCH) {
+	if cm.NegotiateFlags.Has(NTLMSSP_NEGOTIATE_KEY_EXCH) {
 		return nil, errors.New("Key exchange requested but not supported (NTLMSSP_NEGOTIATE_KEY_EXCH)")
 	}
 

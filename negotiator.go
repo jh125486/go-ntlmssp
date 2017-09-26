@@ -77,7 +77,10 @@ func (l Negotiator) RoundTrip(req *http.Request) (res *http.Response, err error)
 		}
 
 		// send negotiate
-		negotiateMessage := NewNegotiateMessage()
+		negotiateMessage, err := NewNegotiateMessage("", "")
+		if err != nil {
+			return nil, err
+		}
 		if resauth.IsNTLM() {
 			req.Header.Set("Authorization", "NTLM "+base64.StdEncoding.EncodeToString(negotiateMessage))
 		} else {

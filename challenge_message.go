@@ -16,7 +16,7 @@ type challengeMessageFields struct {
 }
 
 func (m challengeMessageFields) IsValid() bool {
-	return m.messageHeader.IsValid() && m.MessageType == 2
+	return m.messageHeader.IsValid() && m.MessageType == NtLmChallenge
 }
 
 type challengeMessage struct {
@@ -37,7 +37,7 @@ func (m *challengeMessage) UnmarshalBinary(data []byte) error {
 	}
 
 	if m.challengeMessageFields.TargetName.Len > 0 {
-		m.TargetName, err = m.challengeMessageFields.TargetName.ReadStringFrom(data, m.NegotiateFlags.Has(negotiateFlagNTLMSSPNEGOTIATEUNICODE))
+		m.TargetName, err = m.challengeMessageFields.TargetName.ReadStringFrom(data, m.NegotiateFlags.Has(NTLMSSP_NEGOTIATE_UNICODE))
 		if err != nil {
 			return err
 		}
